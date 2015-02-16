@@ -1,6 +1,148 @@
 <?php 
     session_start();
-    error_reporting( error_reporting() & ~E_NOTICE )
+    error_reporting( error_reporting() & ~E_NOTICE );
+    if (isset($_GET['del'])){
+      unset($_SESSION['advert'][$_GET['del']]);    
+    }
+    if (isset($_GET['show'])){
+      $show= $_SESSION['advert'][$_GET['show']]; 
+    }
+    function show_private(){
+       if (isset($_GET['show']) && $_SESSION['advert'][$_GET['show']]['private']==1){
+         echo '<div class="form-row-indented chec" id="chec"> 
+               <label class="form-label-radio">
+                    <input type="radio" checked="" value="1" name="private">Частное лицо
+                </label>
+            </div>'; 
+       }elseif (isset($_GET['show']) && $_SESSION['advert'][$_GET['show']]['private']==0) {
+         echo '<div class="form-row-indented chec" id="chec"> 
+                <label class="form-label-radio">
+                    <input type="radio" checked="" value="0" name="private">Компания
+                </label> 
+            </div>';
+        }else {
+            echo '<div class="form-row-indented chec" id="chec"> 
+                    <label class="form-label-radio">
+                        <input type="radio" checked="" value="1" name="private">Частное лицо
+                    </label> 
+                    <label class="form-label-radio">
+                        <input type="radio" value="0" name="private">Компания
+                    </label> 
+                </div>';
+        }
+   }
+   function allow_mails(){
+       if (isset($_GET['show']) && $_SESSION['advert'][$_GET['show']]['allow_mails']==""){
+         echo '<div class="form-row-indented"> 
+                <label class="form-label-checkbox" for="allow_mails"> 
+                    <input type="checkbox" value="" name="allow_mails" id="allow_mails" class="form-input-checkbox">
+                    <span class="form-text-checkbox">Я не хочу получать вопросы по объявлению по e-mail</span> 
+                </label> 
+            </div>'; 
+       }elseif (isset($_GET['show']) && $_SESSION['advert'][$_GET['show']]['allow_mails']==0) {
+         echo '<div class="form-row-indented"> 
+                <label class="form-label-checkbox" for="allow_mails"> 
+                    <input type="checkbox" checked="" value="0" name="allow_mails" id="allow_mails" class="form-input-checkbox">
+                    <span class="form-text-checkbox">Я не хочу получать вопросы по объявлению по e-mail</span> 
+                </label> 
+            </div>';
+        }else {
+            echo '
+            <div class="form-row-indented"> 
+                <label class="form-label-checkbox" for="allow_mails"> 
+                    <input type="checkbox" value="0" name="allow_mails" id="allow_mails" class="form-input-checkbox">
+                    <span class="form-text-checkbox">Я не хочу получать вопросы по объявлению по e-mail</span> 
+                </label> 
+            </div>';
+        }
+    }
+    function show_city_block($city=''){
+        if (isset($_GET['show'])){
+            $citys = array('641780'=>'Новосибирск','641490'=>'Барабинск','641510'=>'Бердск','641510'=>'Бердск','641600'=>'Искитим','641630'=>'Колывань','641510'=>'Бердск','641510'=>'Бердск','641510'=>'Бердск','641680'=>'Краснообск','641710'=>'Куйбышев','641760'=>'Мошково');
+            $gorod = $_SESSION['advert'][$_GET['show']]['location_id'];
+
+            echo '<select title="Выберите Ваш город" name="location_id" id="region" class="form-input-select"> 
+            <option value="">-- Выберите город --</option>
+            <option class="opt-group" disabled="disabled">-- Города --</option>';
+                foreach($citys as $number=>$city){
+                    $selected = ($number==$gorod) ? 'selected=""' : ''; 
+                    echo '<option data-coords=",," '.$selected.' value="'.$number.'">'.$city.'</option>'; 
+                }
+            echo '</select>'; 
+        }  else {
+            $citys = array('641780'=>'Новосибирск','641490'=>'Барабинск','641510'=>'Бердск','641510'=>'Бердск','641600'=>'Искитим','641630'=>'Колывань','641510'=>'Бердск','641510'=>'Бердск','641510'=>'Бердск','641680'=>'Краснообск','641710'=>'Куйбышев','641760'=>'Мошково');
+            $gorod = $_SESSION['advert']['location_id'];
+
+            echo '<select title="Выберите Ваш город" name="location_id" id="region" class="form-input-select"> 
+            <option value="">-- Выберите город --</option>
+            <option class="opt-group" disabled="disabled">-- Города --</option>';
+                foreach($citys as $number=>$city){
+                    $selected = ($number==$gorod) ? 'selected=""' : ''; 
+                    echo '<option data-coords=",," '.$selected.' value="'.$number.'">'.$city.'</option>'; 
+                }
+            echo '</select>'; 
+        }  
+    }
+    
+    function show_description(){
+       if (isset($_GET['show'])){
+         echo $_SESSION['advert'][$_GET['show']]['description']; 
+       }else {
+            echo '<textarea maxlength="3000" value="" name="description" id="fld_description" class="form-input-textarea"></textarea> ';
+        }
+    }
+   
+    function show_category_block($categorys=''){
+        if (isset($_GET['show'])){
+            $category_all = array(
+                'Транспорт'=> array(
+                    '9'=>'Автомобили с пробегом','109'=>'Новые автомобили','14'=>'Мотоциклы и мототехника'
+                ),
+                'Недвижимость'=> array(
+                    '24'=>'Квартиры','23'=>'Комнаты','25'=>'Дома, дачи, коттеджи'
+                ),
+                'Работа'=>array(
+                    '111'=>'Вакансии (поиск сотрудников)','112'=>'Резюме (поиск работы)'
+                )
+            );
+            $category = $_SESSION['advert'][$_GET['show']]['category_id'];
+            echo '<select title="Выберите категорию объявления" name="category_id" id="fld_category_id" class="form-input-select"> 
+                <option value="">-- Выберите категорию --</option>';
+                foreach ($category_all as $sKey => $aFamily) {
+                    echo '<option class="opt-group" disabled="disabled">'.$sKey.'</option>';
+                    foreach ($aFamily as $ssKey => $aaFamily) {
+                        $selected = ($category==$ssKey) ? 'selected=""' : ''; 
+                        echo '<option data-coords=",," '.$selected.' value="'.$ssKey.'">'.$aaFamily.'</option>';
+                    }
+            } 
+
+            echo '</select>'; 
+        }else {
+            $category_all = array(
+                'Транспорт'=> array(
+                    '9'=>'Автомобили с пробегом','109'=>'Новые автомобили','14'=>'Мотоциклы и мототехника'
+                ),
+                'Недвижимость'=> array(
+                    '24'=>'Квартиры','23'=>'Комнаты','25'=>'Дома, дачи, коттеджи'
+                ),
+                'Работа'=>array(
+                    '111'=>'Вакансии (поиск сотрудников)','112'=>'Резюме (поиск работы)'
+                )
+            );
+            $category = $_SESSION['advert']['category_id'];
+            echo '<select title="Выберите категорию объявления" name="category_id" id="fld_category_id" class="form-input-select"> 
+                <option value="">-- Выберите категорию --</option>';
+                foreach ($category_all as $sKey => $aFamily) {
+                    echo '<option class="opt-group" disabled="disabled">'.$sKey.'</option>';
+                    foreach ($aFamily as $ssKey => $aaFamily) {
+                        $selected = ($category==$ssKey) ? 'selected=""' : ''; 
+                        echo '<option data-coords=",," '.$selected.' value="'.$ssKey.'">'.$aaFamily.'</option>';
+                    }
+            } 
+
+            echo '</select>'; 
+        }
+    }
 ?>
 
 <!DOCTYPE HTML>
@@ -14,91 +156,35 @@
     </head>
     <body>
         <form  method="post" id="f_item" class="f js-submit">
-            <div class="form-row-indented"> 
-                <label class="form-label-radio">
-                    <input type="radio" checked="" value="1" name="private">Частное лицо
-                </label> 
-                <label class="form-label-radio">
-                    <input type="radio" value="0" name="private">Компания
-                </label> 
-            </div>
+            <?php
+                show_private();
+             ?>
             <div class="form-row"> 
                 <label for="fld_seller_name" class="form-label">
                     <b id="your-name">Ваше имя</b>
                 </label>
-                <input type="text" maxlength="40" class="form-input-text" value="" name="name" id="fld_seller_name">
+                <input type="text" maxlength="40" class="form-input-text" value="<?= $show['name']?>" name="name" id="fld_seller_name">
             </div>
             <div class="form-row"> 
                 <label for="fld_email" class="form-label">Электронная почта</label>
-                <input type="text" class="form-input-text" value="" name="email" id="fld_email">
+                <input type="text" class="form-input-text" value="<?= $show['email']?>" name="email" id="fld_email">
             </div>
-            <div class="form-row-indented"> 
-                <label class="form-label-checkbox" for="allow_mails"> 
-                    <input type="checkbox" value="1" name="allow_mails" id="allow_mails" class="form-input-checkbox">
-                    <span class="form-text-checkbox">Я не хочу получать вопросы по объявлению по e-mail</span> 
-                </label> 
-            </div>
+                <?php
+                    allow_mails();
+                ?>
             <div class="form-row"> 
                 <label id="fld_phone_label" for="fld_phone" class="form-label">Номер телефона</label> 
-                <input type="text" class="form-input-text" value="" name="phone" id="fld_phone">
+                <input type="text" class="form-input-text" value="<?= $show['phone']?>" name="phone" id="fld_phone">
             </div>
             <div id="f_location_id" class="form-row form-row-required"> 
                 <label for="region" class="form-label">Город</label> 
-                <?php 
-                function show_city_block($city=''){
-                    $citys = array('641780'=>'Новосибирск','641490'=>'Барабинск','641510'=>'Бердск','641510'=>'Бердск','641600'=>'Искитим','641630'=>'Колывань','641510'=>'Бердск','641510'=>'Бердск','641510'=>'Бердск','641680'=>'Краснообск','641710'=>'Куйбышев','641760'=>'Мошково');
-                    $gorod = $_SESSION['advert']['location_id'];
-                ?>
-
-                <select title="Выберите Ваш город" name="location_id" id="region" class="form-input-select"> 
-                    <option value="">-- Выберите город --</option>
-                    <option class="opt-group" disabled="disabled">-- Города --</option>
                     <?php
-                        foreach($citys as $number=>$city){
-                            $selected = ($number==$gorod) ? 'selected=""' : ''; 
-                            echo '<option data-coords=",," '.$selected.' value="'.$number.'">'.$city.'</option>';
-                        }
-                
+                        show_city_block();
                     ?>
-                </select> 
-                <?php
-                }
-                    show_city_block();
-                ?>
             </div>
             <div class="form-row"> 
                 <label for="fld_category_id" class="form-label">Категория</label> 
-                    <?php 
-                    function show_category_block($categorys=''){
-                        
-                        $category_all = array(
-                            'Транспорт'=> array(
-                                '9'=>'Автомобили с пробегом','109'=>'Новые автомобили','14'=>'Мотоциклы и мототехника'
-                            ),
-                            'Недвижимость'=> array(
-                                '24'=>'Квартиры','23'=>'Комнаты','25'=>'Дома, дачи, коттеджи'
-                            ),
-                            'Работа'=>array(
-                                '111'=>'Вакансии (поиск сотрудников)','112'=>'Резюме (поиск работы)'
-                            )
-                        );
-                        $category = $_SESSION['advert']['category_id'];
-                    ?>
-
-                    <select title="Выберите категорию объявления" name="category_id" id="fld_category_id" class="form-input-select"> 
-                        <option value="">-- Выберите категорию --</option>
-                        <?php
-                        foreach ($category_all as $sKey => $aFamily) {
-                            echo '<option class="opt-group" disabled="disabled">'.$sKey.'</option>';
-                            foreach ($aFamily as $ssKey => $aaFamily) {
-                                $selected = ($category==$ssKey) ? 'selected=""' : ''; 
-                                echo '<option data-coords=",," '.$selected.' value="'.$ssKey.'">'.$aaFamily.'</option>';
-                            }
-                        }
-                        ?>
-                    </select> 
                     <?php
-                    }
                         show_category_block();
                     ?>
                 </select> 
@@ -113,15 +199,17 @@
             
             <div id="f_title" class="form-row f_title"> 
                 <label for="fld_title" class="form-label">Название объявления</label> 
-                <input type="text" maxlength="50" class="form-input-text-long" value="" name="title" id="fld_title"> 
+                <input type="text" maxlength="50" class="form-input-text-long" value="<?= $show['title']?>" name="title" id="fld_title"> 
             </div>
             <div class="form-row"> 
                 <label for="fld_description" class="form-label" id="js-description-label">Описание объявления</label> 
-                <textarea maxlength="3000" name="description" id="fld_description" class="form-input-textarea"></textarea> 
+                <?php
+                    show_description();
+                ?>    
             </div>
             <div id="price_rw" class="form-row rl"> 
                 <label id="price_lbl" for="fld_price" class="form-label">Цена</label> 
-                <input type="text" maxlength="9" class="form-input-text-short" value="0" name="price" id="fld_price">&nbsp;
+                <input type="text" maxlength="9" class="form-input-text-short" value="<?= $show['price']?>" name="price" id="fld_price">&nbsp;
                 <span id="fld_price_title">руб.</span> 
             </div>
             <div class="form-row-indented form-row-submit b-vas-submit" id="js_additem_form_submit">
@@ -132,18 +220,23 @@
                 </div>
             </div>
         </form>
-        <form method='post' style="margin:20px 0 0 0; border:2px dotted #444; padding:20px; border-bottom: 0;">
-            <input type='submit' value='Название объявления' name='name_advert' style="float:left;">
+        <form method='post' style="margin:20px 0 0 0; border:2px dotted #444; padding:20px;">
+            <span style="float:left;min-width: 152px;">
+                Название объявления
+            </span>
             <span style="float:left;margin: 0 50px 0 50px;">|</span>
-            <span style="float:left;">
+            <span style="float:left;min-width: 100px;">
                 Цена
             </span>
             <span style="float:left;margin: 0 50px 0 50px;">|</span>
-            <span style="float:left;">
+            <span style="float:left;min-width: 100px;">
                 Имя
             </span>
             <span style="float:left;margin: 0 50px 0 50px;">|</span>
-            <input type='submit' value='Удалить' name='del_advert' style="float:left;">
+            <span style="float:left;min-width: 100px;">
+                Удалить
+            </span>
+            <span style="float:left;margin: 0 50px 0 50px;">|</span>
             <div style="clear:both"></div>
         </form>
 
@@ -151,58 +244,29 @@
 </html>   
 
 <?php
-    function name_advert()
-    {
-        echo '<span style="border:2px dotted #444; padding:20px; display:block;">';
-        if ($_SESSION['advert']['private']==0){
-            echo '<span style="margin:0 10px 0 0; color:#555; float:left;">Форма собственности:</span>'.'Частное лицо'.'<br/>';
-        }  else {
-            echo '<span style="margin:0 10px 0 0; color:#555; float:left;">Форма собственности:</span>'.'Компания'.'<br/>';
-        }
-        echo '<div style="clear:both; margin-bottom: 10px;"></div>';
-        echo '<span style="margin:0 10px 0 0; color:#555; float:left;">Ваше имя:</span>'.$_SESSION['advert']['name'].'<br/>';
-        echo '<div style="clear:both; margin-bottom: 10px;"></div>';
-        echo '<span style="margin:0 10px 0 0; color:#555; float:left;">Электронная почта</span>'.$_SESSION['advert']['email'].'<br/>';
-        echo '<div style="clear:both; margin-bottom: 10px;"></div>';
-        echo '<span style="margin:0 10px 0 0; color:#555; float:left;">Номар телефона:</span>'.$_SESSION['advert']['phone'].'<br/>';
-        echo '<div style="clear:both; margin-bottom: 10px;"></div>';
-        echo '<span style="margin:0 10px 0 0; color:#555; float:left;">Город:'.'<br/>'.'</span>';
-        show_city_block();
-        echo '<div style="clear:both; margin-bottom: 10px;"></div>';
-        echo '<span style="margin:0 10px 0 0; color:#555; float:left;">Категория:'.'<br/>'.'</span>';
-        show_category_block();
-        echo '<div style="clear:both; margin-bottom: 10px;"></div>';
-        echo '<span style="margin:0 10px 0 0; color:#555; float:left;">Название обьявления:</span>'.$_SESSION['advert']['title'].'<br/>';
-        echo '<div style="clear:both; margin-bottom: 10px;"></div>';
-        echo '<span style="margin:0 10px 0 0; color:#555; float:left;">Описание обьявления:</span>'.$_SESSION['advert']['description'].'<br/>';
-        echo '<div style="clear:both; margin-bottom: 10px;"></div>';
-        echo '<span style="margin:0 10px 0 0; color:#555; float:left;">Цена:</span>'.$_SESSION['advert']['price'].'<br/>';
-        echo '</span>';
+    $_SESSION['advert'][] = $_POST;
+    foreach ($_SESSION['advert'] as $key => $value){
+        if (isset($value['title']) && isset($value['price']) && isset($value['name'])) {
+            echo '<span style="border:2px dotted #444; padding:20px; display:block;">';
+                echo '<span style="float:left;min-width: 152px;">';
+                    echo '<a href="http://xaver.loc/lesson6/?show='.$key.'">'.$value['title'].'</a>'.'<br/>';
+                echo '</span>';
+                echo '<span style="float:left;margin: 0 50px 0 50px;"">|</span>';
+                echo '<span style="float:left;min-width: 100px;">';
+                    echo $value['price'].'<br/>';
+                echo '</span>';
+                echo '<span style="float:left;margin: 0 50px 0 50px;">|</span>';
+                echo '<span style="float:left;min-width: 100px;">';
+                    echo $value['name'].'<br/>';
+                echo '</span>';
+                echo '<span style="float:left; margin: 0 50px 0 50px;">|</span>';
+                echo '<span style="float:left;min-width: 100px;">';
+                    echo '<a href="http://xaver.loc/lesson6/?del='.$key.'">'.'Удалить'.'</a>'.'<br/>';
+                echo '</span>';
+                echo '<span style="float:left; margin: 0 50px 0 50px;">|</span>';
+                echo '<div style="clear:both; margin-bottom: 10px;";></div>';
+            echo '</span>';
+         }
+         
     }
-    if (isset($_POST['name_advert']))
-        name_advert();
-
-    function del_advert()
-    {
-       unset($_SESSION['advert']); 
-    }
-    if (isset($_POST['name_advert']))
-        del_advert();
-
-    $_SESSION['advert']=$_POST;
-    echo '<span style="border:2px dotted #444; padding:20px; display:block;">';
-        echo '<span style="float:left;min-width: 152px;">';
-            echo $_SESSION['advert']['title'].'<br/>';
-        echo '</span>';
-        echo '<span style="float:left;margin: 0 50px 0 50px;"">|</span>';
-        echo '<span style="float:left;min-width: 35px;">';
-            echo $_SESSION['advert']['price'].'<br/>';
-        echo '</span>';
-        echo '<span style="float:left;margin: 0 50px 0 50px;">|</span>';
-        echo '<span style="float:left;min-width: 30px;">';
-            echo $_SESSION['advert']['name'].'<br/>';
-        echo '</span>';
-        echo '<span style="float:left; margin: 0 50px 0 50px;">|</span>';
-        echo '<div style="clear:both; margin-bottom: 10px;";></div>';
-    echo '</span>';
 ?>
